@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LingDay OAuth Redirect</title>
+</head>
+<body>
+    <h1>Authentication successful!</h1>
+    <p>You can close this window and return to the app.</p>
+    
+    <script>
+        // Автоматически извлекаем токен из URL
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const token = params.get('access_token') || params.get('id_token');
+        
+        if (token) {
+            // Можно передать токен обратно в приложение
+            console.log('Token received:', token.substring(0, 50) + '...');
+            
+            // Для Android можно использовать deep link
+            if (window.Android && window.Android.receiveToken) {
+                window.Android.receiveToken(token);
+            }
+        }
+        
+        // Автоматически закрываем через 3 секунды
+        setTimeout(() => {
+            window.close();
+        }, 3000);
+    </script>
+</body>
+</html>
