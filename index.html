@@ -1,32 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LingDay OAuth Redirect</title>
+    <title>LingDay - OAuth Redirect</title>
+    <meta charset="utf-8">
 </head>
-<body>
-    <h1>Authentication successful!</h1>
-    <p>You can close this window and return to the app.</p>
+<body style="text-align: center; padding: 50px; font-family: Arial;">
+    <h1>✅ Authentication Successful</h1>
+    <p>You can now close this window and return to the LingDay app.</p>
+    <p id="status">Processing...</p>
     
     <script>
-        // Автоматически извлекаем токен из URL
-        const hash = window.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
-        const token = params.get('access_token') || params.get('id_token');
-        
-        if (token) {
-            // Можно передать токен обратно в приложение
-            console.log('Token received:', token.substring(0, 50) + '...');
+        // Извлекаем токен из URL
+        function extractToken() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const token = params.get('access_token') || params.get('id_token');
             
-            // Для Android можно использовать deep link
-            if (window.Android && window.Android.receiveToken) {
-                window.Android.receiveToken(token);
+            if (token) {
+                document.getElementById('status').innerHTML = 
+                    'Token received! You can close this window.';
+                console.log('OAuth token:', token.substring(0, 30) + '...');
+                
+                // Пытаемся передать в приложение если это Android WebView
+                if (window.Android && window.Android.receiveToken) {
+                    window.Android.receiveToken(token);
+                }
+                
+                // Автоматически закрываем через 2 секунды
+                setTimeout(() => {
+                    window.close();
+                }, 2000);
+            } else {
+                document.getElementById('status').innerHTML = 
+                    'No token found in URL. Waiting...';
             }
         }
         
-        // Автоматически закрываем через 3 секунды
-        setTimeout(() => {
-            window.close();
-        }, 3000);
+        // Проверяем при загрузке
+        extractToken();
+        
+        // И следим за изменениями hash (для OAuth redirect)
+        window.onhashchange = extractToken;
     </script>
 </body>
 </html>
